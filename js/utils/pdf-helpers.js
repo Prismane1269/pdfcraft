@@ -37,11 +37,24 @@ window.PDFCraftHelpers = {
     });
   },
 
-  // Load PDF with PDF.js
+  // Safe clone helper to prevent ArrayBuffer detachment issues with Web Workers
+  cloneBuffer(input) {
+    if (!input) return new ArrayBuffer(0);
+    if (input instanceof ArrayBuffer) {
+      return input.slice(0);
+    }
+    if (input.buffer instanceof ArrayBuffer) {
+      return input.buffer.slice(input.byteOffset, input.byteOffset + input.byteLength);
+    }
+    return input;
+  },
+
+  // Load PDF with PDF.js (always clones to prevent worker detachment of original buffer)
   async loadPdfJsDoc(arrayBuffer, password = null) {
     this.initPdfJs();
+    const cloned = this.cloneBuffer(arrayBuffer);
     const loadingTask = window.pdfjsLib.getDocument({
-      data: arrayBuffer,
+      data: new Uint8Array(cloned),
       password: password || undefined,
       cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
       cMapPacked: true,
@@ -49,9 +62,10 @@ window.PDFCraftHelpers = {
     return await loadingTask.promise;
   },
 
-  // Load PDF with PDF-lib
+  // Load PDF with PDF-lib (always clones to protect original buffer)
   async loadPdfLibDoc(arrayBuffer, options = {}) {
-    return await window.PDFLib.PDFDocument.load(arrayBuffer, {
+    const cloned = this.cloneBuffer(arrayBuffer);
+    return await window.PDFLib.PDFDocument.load(new Uint8Array(cloned), {
       ignoreEncryption: options.ignoreEncryption || false,
       updateMetadata: options.updateMetadata !== false
     });
@@ -80,7 +94,6 @@ window.PDFCraftHelpers = {
   // Parse page range string like "1-3, 5, 8-10" to array of 0-based page indices
   parsePageRanges(rangeStr, totalPages) {
     if (!rangeStr || rangeStr.trim() === '') {
-      // Default: all pages
       return Array.from({ length: totalPages }, (_, i) => i);
     }
 

@@ -4,7 +4,6 @@ window.PDFCraftTools = window.PDFCraftTools || {};
 window.PDFCraftTools.split = {
   file: null,
   arrayBuffer: null,
-  pdfLibDoc: null,
   pdfJsDoc: null,
   totalPages: 0,
 
@@ -21,7 +20,11 @@ window.PDFCraftTools.split = {
     if (!dropZone || !fileInput) return;
 
     dropZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => this.handleFile(e.target.files[0]));
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        this.handleFile(e.target.files[0]);
+      }
+    });
 
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -53,7 +56,8 @@ window.PDFCraftTools.split = {
   },
 
   async handleFile(file) {
-    if (!file || file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
       window.PDFCraftApp.showToast('Please upload a valid PDF file.', 'error');
       return;
     }
@@ -63,7 +67,6 @@ window.PDFCraftTools.split = {
       this.file = file;
       this.arrayBuffer = await window.PDFCraftHelpers.readFileAsArrayBuffer(file);
       this.pdfJsDoc = await window.PDFCraftHelpers.loadPdfJsDoc(this.arrayBuffer);
-      this.pdfLibDoc = await window.PDFCraftHelpers.loadPdfLibDoc(this.arrayBuffer);
       this.totalPages = this.pdfJsDoc.numPages;
 
       // Update UI
@@ -85,12 +88,12 @@ window.PDFCraftTools.split = {
     } catch (err) {
       window.PDFCraftApp.hideLoader();
       window.PDFCraftApp.showToast(`Failed to read PDF: ${err.message}`, 'error');
-      console.error(err);
+      console.error('Split handleFile error:', err);
     }
   },
 
   async process() {
-    if (!this.pdfLibDoc) {
+    if (!this.arrayBuffer) {
       window.PDFCraftApp.showToast('Please select a PDF file first.', 'warning');
       return;
     }
@@ -100,6 +103,7 @@ window.PDFCraftTools.split = {
 
     try {
       window.PDFCraftApp.showLoader('Processing PDF split...');
+      const sourcePdfDoc = await window.PDFCraftHelpers.loadPdfLibDoc(this.arrayBuffer);
 
       if (mode === 'range') {
         const rangeStr = document.getElementById('splitRangeInput').value;
@@ -112,19 +116,19 @@ window.PDFCraftTools.split = {
         }
 
         const newDoc = await window.PDFLib.PDFDocument.create();
-        const copiedPages = await newDoc.copyPages(this.pdfLibDoc, pageIndices);
+        const copiedPages = await newDoc.copyPages(sourcePdfDoc, pageIndices);
         copiedPages.forEach(p => newDoc.addPage(p));
 
         const pdfBytes = await newDoc.save();
         const outName = `${baseName}_split_p${pageIndices.map(i => i + 1).join('-')}.pdf`;
         window.PDFCraftDownload.downloadPdfBytes(pdfBytes, outName);
-        window.PDFCraftApp.showToast(`Successfully extracted ${pageIndices.length} pages!`, 'success');
+        window.PDFCraftApp.showToast(`Successfully extracted ${pageIndices.length} page(s)!`, 'success');
       } else {
         // Split every page into individual single-page PDFs in a ZIP
         const zipFiles = [];
         for (let i = 0; i < this.totalPages; i++) {
           const singleDoc = await window.PDFLib.PDFDocument.create();
-          const [copiedPage] = await singleDoc.copyPages(this.pdfLibDoc, [i]);
+          const [copiedPage] = await singleDoc.copyPages(sourcePdfDoc, [i]);
           singleDoc.addPage(copiedPage);
           const singleBytes = await singleDoc.save();
           zipFiles.push({
@@ -141,7 +145,7 @@ window.PDFCraftTools.split = {
     } catch (err) {
       window.PDFCraftApp.hideLoader();
       window.PDFCraftApp.showToast(`Split failed: ${err.message}`, 'error');
-      console.error(err);
+      console.error('Split process error:', err);
     }
   }
 };
