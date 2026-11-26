@@ -195,10 +195,10 @@ class TestPDFCraftSuite(unittest.TestCase):
         doc = fitz.open(self.sample_en)
         meta = doc.metadata
         meta["title"] = "Updated Test Title"
-        meta["author"] = "Taseen (Prismane1269)"
+        meta["author"] = "Taseen (Taseen-dev)"
         doc.set_metadata(meta)
         self.assertEqual(doc.metadata["title"], "Updated Test Title")
-        self.assertEqual(doc.metadata["author"], "Taseen (Prismane1269)")
+        self.assertEqual(doc.metadata["author"], "Taseen (Taseen-dev)")
         doc.close()
 
 

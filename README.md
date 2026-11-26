@@ -1,7 +1,7 @@
 # PDFCraft Studio 🛠️📄
 ### All-in-One PDF Suite & High-Accuracy Bengali OCR
 
-[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-indigo.svg)](https://prismane1269.github.io/pdfcraft)
+[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-indigo.svg)](https://taseen-dev.github.io/pdfcraft)
 [![Bengali OCR](https://img.shields.io/badge/Powered%20By-bangla--pdf--ocr-emerald.svg)](https://github.com/Bangla-RAG/PoRAG)
 [![Privacy First](https://img.shields.io/badge/Privacy-100%25%20Client--Side-blue.svg)](#privacy--security)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -51,12 +51,12 @@ PDFCraft runs **100% client-side** in your browser using modern WebAssembly (`pd
 ## 🚀 Quick Start
 
 ### Option A: Online on GitHub Pages
-Visit: **[https://prismane1269.github.io/pdfcraft](https://prismane1269.github.io/pdfcraft)**
+Visit: **[https://taseen-dev.github.io/pdfcraft](https://taseen-dev.github.io/pdfcraft)**
 
 ### Option B: Run Locally with Python & Native bangla-pdf-ocr
 ```bash
 # Clone the repository
-git clone https://github.com/Prismane1269/pdfcraft.git
+git clone https://github.com/Taseen-dev/pdfcraft.git
 cd pdfcraft
 
 # Run the local backend (Flask)
@@ -76,4 +76,4 @@ python3 test_tools.py
 ---
 
 ## 📄 License
-MIT License. Created by [Taseen (Prismane1269)](https://github.com/Prismane1269).
+MIT License. Created by [Taseen (Taseen-dev)](https://github.com/Taseen-dev).
